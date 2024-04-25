@@ -44,7 +44,9 @@ class MainActivity : AppCompatActivity() {
         setupSection("section_1",binding.section1MainLayout,binding.section1Title,binding.section1Recyclerview)
         setupSection("section_2",binding.section2MainLayout,binding.section2Title,binding.section2Recyclerview)
         setupSection("section_3",binding.section3MainLayout,binding.section3Title,binding.section3Recyclerview)
+        setupSection("remixes",binding.remixesMainLayout,binding.remixesTitle,binding.remixesRecyclerview)
         setupMostlyPlayed("mostly_played",binding.mostlyPlayedMainLayout,binding.mostlyPlayedTitle,binding.mostlyPlayedRecyclerview)
+
         binding.menu.setOnClickListener{
             showPopupMenu()
         }
