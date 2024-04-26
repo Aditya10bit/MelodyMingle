@@ -69,7 +69,39 @@
         android:layout_marginTop="8dp"
         app:hide_on_touch="false"
         app:show_timeout="0"
-        android:id="@+id/player_view"/>
+        android:id="@+id/player_view">
+
+    </androidx.media3.ui.PlayerView>
 
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:weightSum="4"
+        android:gravity="center">
+
+
+        <Button
+            android:id="@+id/PreviousButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:text="Back"
+            android:textColor="@color/textwhite"
+            android:backgroundTint="#133655"/>
+
+        <Button
+            android:id="@+id/nextButton"
+            style="@style/Widget.Material3.Button.ElevatedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:backgroundTint="#133655"
+            android:text="Next"
+
+            android:textColor="@color/textwhite" />
+
+    </LinearLayout>
 </LinearLayout>
