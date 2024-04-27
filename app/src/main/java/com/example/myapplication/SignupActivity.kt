@@ -1,6 +1,7 @@
 package com.example.myapplication
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Patterns
 import android.view.View
@@ -28,6 +29,12 @@ class SignupActivity : AppCompatActivity() {
         )
         setContentView(binding.root)
 
+        val videoPath = "android.resource://com.example.myapplication/" + R.raw.video
+        val videoUri = Uri.parse(videoPath)
+        binding.video.setVideoURI(videoUri)
+        binding.video.start()
+
+
         binding.createaccountBtn.setOnClickListener {
             val email = binding.emailEdittext.text.toString()
             val password = binding.passwordEdittext.text.toString()
@@ -53,6 +60,18 @@ class SignupActivity : AppCompatActivity() {
         binding.gotoLogin.setOnClickListener{
            finish()
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // Pause the video when the activity is paused
+        binding.video.pause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Resume playing the video when the activity is resumed
+        binding.video.resume()
     }
 
     fun createAccWithFireBase(email : String,password :String){

@@ -1,115 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="8dp"
-    android:background="#0F1B3A"
+    android:background="@color/black"
     tools:context=".SignupActivity"
     android:gravity="center">
 
-    <LinearLayout
+
+    <VideoView
+        android:id="@+id/video"
+        android:layout_width="422dp"
+        android:layout_height="748dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.545"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.529" />
+
+    <EditText
+        android:id="@+id/confirmpassword_edittext"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center">
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="20dp"
+        android:background="@drawable/rounded_corner"
+        android:hint="Confirm Password"
+        android:inputType="textPassword"
+        android:padding="16dp"
+        android:textColorHint="@color/black"
+        app:layout_constraintEnd_toStartOf="@+id/video"
+        app:layout_constraintStart_toEndOf="@+id/video"
+        app:layout_constraintTop_toBottomOf="@+id/password_edittext" />
 
-        <ImageView
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:src="@drawable/mpplayer"/>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="10dp"
-            android:textColor="#8CDC83"
-            android:textStyle="bold"
-            android:fontFamily="cursive"
-            android:text="Binge into the melodyverse of songs... "
-            android:gravity="center"
-            android:textSize="32sp"/>
-    </LinearLayout>
-
-
-    <LinearLayout
+    <EditText
+        android:id="@+id/password_edittext"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingTop="20dp"
-        android:gravity="center">
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="20dp"
+        android:background="@drawable/rounded_corner"
+        android:hint="Password"
+        android:inputType="textPassword"
+        android:padding="16dp"
+        android:textColorHint="@color/black"
+        app:layout_constraintEnd_toStartOf="@+id/video"
+        app:layout_constraintStart_toEndOf="@+id/video"
+        app:layout_constraintTop_toBottomOf="@+id/email_edittext" />
 
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Email Address"
-            android:textColorHint="@color/black"
-            android:inputType="textEmailAddress"
-            android:id="@+id/email_edittext"
-            android:background="@drawable/rounded_corner"
-            android:padding="16dp"/>
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="20dp"/>
+    <EditText
+        android:id="@+id/email_edittext"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="460dp"
+        android:layout_marginEnd="20dp"
+        android:background="@drawable/rounded_corner"
+        android:hint="Email Address"
+        android:inputType="textEmailAddress"
+        android:padding="16dp"
+        android:textColorHint="@color/black"
+        app:layout_constraintEnd_toStartOf="@+id/video"
+        app:layout_constraintStart_toEndOf="@+id/video"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Password"
-            android:textColorHint="@color/black"
-            android:inputType="textPassword"
-            android:id="@+id/password_edittext"
-            android:background="@drawable/rounded_corner"
-            android:padding="16dp"/>
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="20dp"/>
-        
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Confirm Password"
-            android:textColorHint="@color/black"
-            android:inputType="textPassword"
-            android:id="@+id/confirmpassword_edittext"
-            android:background="@drawable/rounded_corner"
-            android:padding="16dp"/>
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="20dp"/>
-        
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="60dp"
-            android:id="@+id/createaccount_btn"
-            android:text="Create Accoount"
-            android:backgroundTint="#629A2B"/>
-        
-        <ProgressBar
-            android:layout_width="32dp"
-            android:layout_height="60dp"
-            android:id="@+id/progress_bar"
-            android:indeterminateTint="#48BA33"
-            android:visibility="gone"/>
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="20dp"/>
+    <Button
+        android:id="@+id/createaccount_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="60dp"
+        android:layout_marginTop="12dp"
+        android:backgroundTint="@color/blueDark"
+        android:text="Create Accoount"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/confirmpassword_edittext" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Already have an account? Sign in "
-            android:gravity="center"
-            android:id="@+id/goto_login"
-            android:textColor="#8CDC83"
-            android:textSize="18sp"/>
+    <TextView
+        android:id="@+id/goto_login"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="750dp"
+        android:gravity="center"
+        android:text="Already have an account ? Sign in "
+        android:textColor="#DFB03A"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="42dp"
+        android:layout_height="52dp"
+        android:layout_marginTop="688dp"
+        android:indeterminateTint="@color/blueDark"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-
-
-
-
-    </LinearLayout>
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
