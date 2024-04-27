@@ -24,7 +24,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.firestore
-
+import com.google.type.Color
 
 
 class MainActivity : AppCompatActivity() {
@@ -141,7 +141,7 @@ class MainActivity : AppCompatActivity() {
                 //getmostly played songs
 
                 FirebaseFirestore.getInstance().collection("songs")
-                    .orderBy("count", Query.Direction.DESCENDING).limit(5)
+                    .orderBy("count", Query.Direction.DESCENDING).limit(10)
                     .get().addOnSuccessListener {songListSnapshot->
                         val songsModelList = mutableListOf<SongModels>()
                         for (document in songListSnapshot.documents) {

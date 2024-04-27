@@ -84,7 +84,7 @@
         android:id="@+id/goto_login"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="750dp"
+        android:layout_marginTop="745dp"
         android:gravity="center"
         android:text="Already have an account ? Sign in "
         android:textColor="#DFB03A"

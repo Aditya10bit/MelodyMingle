@@ -1,6 +1,8 @@
+
 package com.example.myapplication
 
 import android.content.Intent
+import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import android.util.Patterns
 import android.view.View
@@ -17,7 +19,7 @@ class LoginActivity : AppCompatActivity() {
     lateinit var binding: ActivityLoginBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-       binding = ActivityLoginBinding.inflate(layoutInflater)
+        binding = ActivityLoginBinding.inflate(layoutInflater)
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         window.setFlags(
             WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -44,6 +46,19 @@ class LoginActivity : AppCompatActivity() {
         binding.gotoSignup.setOnClickListener{
             startActivity(Intent(this,SignupActivity::class.java))
         }
+
+        // Access the root layout using View Binding
+        val constraintLayout = binding.main
+
+        // Get the background drawable and cast it to AnimationDrawable
+        val animationDrawable = constraintLayout.background as AnimationDrawable
+
+        // Set the fade durations
+        animationDrawable.setEnterFadeDuration(2500)
+        animationDrawable.setExitFadeDuration(5000)
+
+        // Start the animation
+        animationDrawable.start()
     }
 
     fun LoginWithFireBase(email : String,password :String){
