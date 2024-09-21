@@ -16,7 +16,7 @@ import com.example.myapplication.models.CategoryModels
 
 class SongsListActivity : AppCompatActivity() {
     companion object{
-       lateinit var category:CategoryModels
+        lateinit var category:CategoryModels
     }
     lateinit var binding: ActivitySongsListBinding
     lateinit var songsListAdapters: SongsListAdapters

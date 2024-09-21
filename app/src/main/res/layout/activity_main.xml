@@ -9,7 +9,6 @@
     android:padding="16dp"
     tools:context=".MainActivity">
 
-
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -33,52 +32,70 @@
             android:textSize="24sp"
             android:textStyle="bold" />
 
-
         <ImageView
             android:id="@+id/menu"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_centerVertical="true"
             android:layout_alignParentEnd="true"
-            app:srcCompat="@drawable/baseline_menu_24"
-           />
+            app:srcCompat="@drawable/baseline_menu_24" />
 
     </RelativeLayout>
-    
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="16dp"
+        android:layout_above="@id/player_view"
         android:layout_below="@id/toolbar"
-        android:layout_above="@id/player_view">
-        
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="0dp">
+
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <TextView
                 android:id="@+id/textView3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-medium"
                 android:layout_marginLeft="10dp"
+                android:fontFamily="sans-serif-medium"
                 android:text="Categories"
                 android:textColor="@color/white"
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
-            <androidx.recyclerview.widget.RecyclerView
+            <!-- New search bar -->
+            <EditText
+                android:id="@+id/searchEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/categories_recyclerview"
-                android:layout_marginTop="10dp">
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:background="@android:color/white"
+                android:hint="Search song"
+                android:padding="8dp"
+                android:textColor="@android:color/black"
+                android:visibility="gone" />
 
-            </androidx.recyclerview.widget.RecyclerView>
+            <ImageButton
+                android:id="@+id/search"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="end"
+                android:background="@drawable/search"
+                android:contentDescription="searchbutton" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/categories_recyclerview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp" />
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="30dp"/>
+                android:layout_height="30dp" />
 
             <RelativeLayout
                 android:id="@+id/mostly_played_mainLayout"
@@ -108,15 +125,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/mostly_played_title"
-                    android:layout_marginTop="-3dp">
-
-                </androidx.recyclerview.widget.RecyclerView>
+                    android:layout_marginTop="-3dp" />
 
             </RelativeLayout>
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="30dp"/>
+                android:layout_height="30dp" />
 
             <RelativeLayout
                 android:id="@+id/section_1_mainLayout"
@@ -146,17 +161,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/section_1_title"
-                    android:layout_marginTop="-3dp">
-
-                </androidx.recyclerview.widget.RecyclerView>
+                    android:layout_marginTop="-3dp" />
 
             </RelativeLayout>
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="30dp"/>
-
-
+                android:layout_height="30dp" />
 
             <RelativeLayout
                 android:id="@+id/section_2_mainLayout"
@@ -186,15 +197,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/section_2_title"
-                    android:layout_marginTop="-3dp">
-
-                </androidx.recyclerview.widget.RecyclerView>
+                    android:layout_marginTop="-3dp" />
 
             </RelativeLayout>
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="30dp"/>
+                android:layout_height="30dp" />
 
             <RelativeLayout
                 android:id="@+id/section_3_mainLayout"
@@ -224,15 +233,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/section_3_title"
-                    android:layout_marginTop="-3dp">
-
-                </androidx.recyclerview.widget.RecyclerView>
+                    android:layout_marginTop="-3dp" />
 
             </RelativeLayout>
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="30dp"/>
+                android:layout_height="30dp" />
 
             <RelativeLayout
                 android:id="@+id/remixes_mainLayout"
@@ -262,42 +269,37 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/remixes_title"
-                    android:layout_marginTop="-3dp">
-
-                </androidx.recyclerview.widget.RecyclerView>
+                    android:layout_marginTop="-3dp" />
 
             </RelativeLayout>
 
-
         </LinearLayout>
+
     </ScrollView>
+
     <RelativeLayout
+        android:id="@+id/player_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:id="@+id/player_view"
         android:background="@color/green"
         android:padding="8dp">
 
-
         <ImageView
+            android:id="@+id/song_cover_image_view"
             android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:id="@+id/song_cover_image_view" />
+            android:layout_height="40dp" />
 
         <TextView
+            android:id="@+id/song_title_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@id/song_title_text_view"
-            android:text="Now Playing :"
-            android:textColor="@color/white"
-            android:textSize="20sp"
+            android:layout_centerVertical="true"
             android:layout_toEndOf="@id/song_cover_image_view"
             android:paddingStart="16dp"
-            android:layout_centerVertical="true"/>
-
-
-
+            android:text="Now Playing :"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
 
     </RelativeLayout>
 

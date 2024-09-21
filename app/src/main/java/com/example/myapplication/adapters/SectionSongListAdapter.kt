@@ -9,14 +9,14 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
 import com.example.myapplication.MyExoplayer
 import com.example.myapplication.PlayerActivity
-import com.example.myapplication.SongsListActivity
+
 import com.example.myapplication.databinding.SectionSongListRecyclerRowBinding
-import com.example.myapplication.databinding.SongListItemRecyclerviewBinding
+
 import com.example.myapplication.models.SongModels
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.toObject
 
-class SectionSongListAdapter(private val songidList: List<String>):
+
+class SectionSongListAdapter(val songidList: List<String>):
     RecyclerView.Adapter<SectionSongListAdapter.MyViewHolder>() {
 
     class MyViewHolder(private val binding:SectionSongListRecyclerRowBinding):RecyclerView.ViewHolder(binding.root){

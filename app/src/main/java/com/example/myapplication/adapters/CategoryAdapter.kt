@@ -1,5 +1,6 @@
 package com.example.myapplication.adapters
 
+
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.RoundedCorner
