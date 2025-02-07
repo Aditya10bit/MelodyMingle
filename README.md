@@ -16,6 +16,8 @@ Dynamic Interface Elements: The dynamic and responsive user interface of MelodyM
 
 Secure Access: Prioritizing user privacy and security, I implemented Firebase Authentication to ensure that only authenticated users have access to the app. This approach provides users with peace of mind while enjoying their favorite music🔓.
 
+android foreground service - for continous flow of the app in the background.
+
 github->https://lnkd.in/ddyC8Dui
 
 
