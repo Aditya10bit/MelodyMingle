@@ -21,7 +21,7 @@ android foreground service - for continous flow of the app in the background.
 github->https://lnkd.in/ddyC8Dui
 
 
-android download link -> [https://lnkd.in/d9D9dbNV](https://www.dropbox.com/scl/fi/o6imodz6alqgoe2zi183j/melodymingle.apk?rlkey=il3g6giftm10i4jzkkiynkxlz&st=ecep8qyp&dl=0)
+android download link -> https://www.dropbox.com/scl/fi/uipb483l9pd643tyhzngg/melodymingle.apk?rlkey=wq6539f86wrga080ih68yghvj&st=xut1iq9i&dl=0
 
 
 ![WhatsApp Image 2025-02-07 at 10 27 54_1155ab24](https://github.com/user-attachments/assets/5ad5a85c-8682-46be-81c7-64e4049fe2cd)
