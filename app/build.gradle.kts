@@ -4,11 +4,12 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     id("com.google.gms.google-services")
+
 }
 
 android {
     namespace = "com.example.myapplication"
-    compileSdk = 34
+    compileSdk = 35
 
     buildFeatures{
         viewBinding=true
@@ -17,7 +18,7 @@ android {
     defaultConfig {
         applicationId = "com.example.myapplication"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -51,16 +52,22 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.auth)
+    implementation(libs.firebase.storage)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    implementation ("com.github.bumptech.glide:glide:4.16.0")
-    implementation ("com.github.bumptech.glide:okhttp3-integration:4.16.0")
-    implementation("androidx.media3:media3-exoplayer:1.3.1")
-    implementation("androidx.media3:media3-exoplayer-dash:1.3.1")
-    implementation("androidx.media3:media3-ui:1.3.1")
-    implementation ("androidx.media2:media2-session:1.2.0")
-    implementation ("com.airbnb.android:lottie:6.4.0")
-
+    implementation (libs.glide)
+    implementation (libs.glide.okhttp3.integration)
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.exoplayer.dash)
+    implementation(libs.androidx.media3.ui)
+    implementation (libs.androidx.media2.session)
+    implementation (libs.lottie)
+    implementation(libs.firebase.auth)
+    implementation(libs.google.services.auth)
+    implementation (platform(libs.firebase.bom))
+    implementation(libs.kotlinx.coroutines.core)
+    implementation (libs.kotlinx.coroutines.play.services)
+    implementation ("androidx.media:media:1.7.0")
 
 }

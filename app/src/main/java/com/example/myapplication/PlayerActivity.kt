@@ -1,167 +1,302 @@
-// PlayerActivity.kt
-
 package com.example.myapplication
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
-import android.view.Window
 import android.view.WindowManager
 import android.widget.Toast
+import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.isVisible
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestOptions
 import com.example.myapplication.databinding.ActivityPlayerBinding
+import com.example.myapplication.models.CategoryModels
 import com.example.myapplication.models.SongModels
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 class PlayerActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPlayerBinding
     private lateinit var exoPlayer: ExoPlayer
-    private var playerListener = object : Player.Listener {
+    private var isFavorite = false
+    private val auth = FirebaseAuth.getInstance()
+    private val firestore = FirebaseFirestore.getInstance()
+
+    private val playerListener = object : Player.Listener {
         override fun onIsPlayingChanged(isPlaying: Boolean) {
             super.onIsPlayingChanged(isPlaying)
-            showGif(isPlaying)
+            showGif(isPlaying && exoPlayer.playbackState == Player.STATE_READY)
+        }
+
+        override fun onPlaybackStateChanged(playbackState: Int) {
+            super.onPlaybackStateChanged(playbackState)
+            showGif(exoPlayer.isPlaying && playbackState == Player.STATE_READY)
         }
     }
 
+    @OptIn(UnstableApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        requestWindowFeature(Window.FEATURE_NO_TITLE)
-        window.setFlags(
-            WindowManager.LayoutParams.FLAG_FULLSCREEN,
-            WindowManager.LayoutParams.FLAG_FULLSCREEN
-        )
         binding = ActivityPlayerBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
-        MyExoplayer.getCurrentSong()?.apply {
-            binding.songTitleTextView.text = title
-            binding.songSubtitleTextView.text = subtitle
-            Glide.with(binding.songCoverImageView).load(coverUrl)
-                .circleCrop().into(binding.songCoverImageView)
-            Glide.with(binding.songGifImageView).load(R.drawable.media_playing)
-                .circleCrop().into(binding.songGifImageView)
-            exoPlayer = MyExoplayer.getInstance()!!
-            binding.playerView.player = exoPlayer
-            binding.playerView.showController()
-            exoPlayer.addListener(playerListener)
-
-            // Set click listener for the next button
-            binding.nextButton.setOnClickListener {
-                playNextSong()
-            }
-            binding.PreviousButton.setOnClickListener{
-                playPreviousSong()
-            }
+        // Make the activity fullscreen
+        window.apply {
+            addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+            statusBarColor = Color.TRANSPARENT
+            decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+                    View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
         }
 
+        setContentView(binding.root)
+
+        // Load and setup GIF
+        Glide.with(this)
+            .asGif()
+            .load(R.drawable.media_playing)
+            .into(binding.songGifImageView)
+
+        MyExoplayer.getCurrentSong()?.apply {
+            setupPlayerUI(this)
+            setupNavigationControls()
+            checkIfFavorite(this)
+            setupFavoriteButton(this)
+        }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        exoPlayer.removeListener(playerListener)
+    private fun checkIfFavorite(song: SongModels) {
+        val userId = auth.currentUser?.uid ?: return
+        firestore.collection("sections")
+            .document("favorites_${userId}")
+            .get()
+            .addOnSuccessListener { document ->
+                val category = document.toObject(CategoryModels::class.java)
+                isFavorite = category?.songs?.contains(song.id) == true
+                updateFavoriteIcon()
+            }
+    }
+
+    private fun setupFavoriteButton(song: SongModels) {
+        binding.favoriteButton.setOnClickListener {
+            val userId = auth.currentUser?.uid ?: return@setOnClickListener
+            val favoritesRef = firestore.collection("sections").document("favorites_${userId}")
+
+            if (isFavorite) {
+                // Remove from favorites
+                favoritesRef.get().addOnSuccessListener { document ->
+                    val category = document.toObject(CategoryModels::class.java)
+                    val updatedSongs = category?.songs?.filter { it != song.id } ?: listOf()
+
+                    favoritesRef.set(
+                        CategoryModels(
+                            name = "My Favorites",
+                            coverUrl = song.coverUrl,
+                            songs = updatedSongs
+                        )
+                    ).addOnSuccessListener {
+                        isFavorite = false
+                        updateFavoriteIcon()
+                        Toast.makeText(this, "Removed from favorites", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } else {
+                // Add to favorites
+                favoritesRef.get().addOnSuccessListener { document ->
+                    val category = document.toObject(CategoryModels::class.java)
+                    val currentSongs = category?.songs ?: listOf()
+                    val updatedSongs = currentSongs + song.id
+
+                    favoritesRef.set(
+                        CategoryModels(
+                            name = "My Favorites",
+                            coverUrl = song.coverUrl,
+                            songs = updatedSongs
+                        )
+                    ).addOnSuccessListener {
+                        isFavorite = true
+                        updateFavoriteIcon()
+                        Toast.makeText(this, "Added to favorites", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun updateFavoriteIcon() {
+        binding.favoriteButton.setImageResource(
+            if (isFavorite) R.drawable.like else R.drawable.unlike
+        )
+    }
+
+    @OptIn(UnstableApi::class)
+    private fun setupPlayerUI(song: SongModels) {
+        binding.songTitleTextView.text = song.title
+        binding.songSubtitleTextView.text = song.subtitle
+
+        // Improve image loading with crossfade and placeholder
+        Glide.with(binding.songCoverImageView)
+            .load(song.coverUrl)
+            .transition(DrawableTransitionOptions.withCrossFade())
+            .circleCrop()
+            .error(R.drawable.mpplayer)
+            .into(binding.songCoverImageView)
+
+        exoPlayer = MyExoplayer.getInstance()!!
+        binding.playerView.apply {
+            player = exoPlayer
+            setShowNextButton(false)
+            setShowPreviousButton(false)
+            setShowFastForwardButton(false)
+            setShowRewindButton(false)
+            controllerHideOnTouch = false
+            controllerShowTimeoutMs = 0
+        }
+
+        exoPlayer.addListener(playerListener)
+
+        // Show GIF if already playing
+        showGif(exoPlayer.isPlaying && exoPlayer.playbackState == Player.STATE_READY)
+    }
+
+    private fun setupNavigationControls() {
+        binding.nextButton.setOnClickListener { playNextSong() }
+        binding.PreviousButton.setOnClickListener { playPreviousSong() }
     }
 
     private fun showGif(show: Boolean) {
-        binding.songGifImageView.isVisible = show
+        binding.songGifImageView.apply {
+            if (show && visibility != View.VISIBLE) {
+                alpha = 0f
+                visibility = View.VISIBLE
+                animate()
+                    .alpha(1f)
+                    .setDuration(300)
+                    .start()
+            } else if (!show && visibility == View.VISIBLE) {
+                animate()
+                    .alpha(0f)
+                    .setDuration(300)
+                    .withEndAction { visibility = View.INVISIBLE }
+                    .start()
+            }
+        }
     }
 
-
     private fun playPreviousSong() {
-        MyExoplayer.getCurrentSong()?.let { currentSong ->
-            getPreviousSong(currentSong,
-                onSuccess = { PreviousSong ->
-                    MyExoplayer.startPlaying(this, PreviousSong)
-                    updateUI(PreviousSong)
-                },
-                onFailure = {
-                    // Handle failure to retrieve the next song
-                    // For example, display a message indicating no next song available
-                }
-            )
+        MyExoplayer.currentPlaylist.let { playlist ->
+            if (playlist.isEmpty()) {
+                showToast("No songs in playlist")
+                return
+            }
+
+            val currentIndex = playlist.indexOfFirst { it == MyExoplayer.getCurrentSong()?.id }
+            val prevIndex = if (currentIndex == 0) playlist.size - 1 else currentIndex - 1
+            playSongAtIndex(prevIndex)
         }
     }
 
     private fun getPreviousSong(currentSong: SongModels, onSuccess: (SongModels) -> Unit, onFailure: () -> Unit) {
-        // Logic to retrieve the next song based on the current song
         val currentSongIndex = SongsListActivity.category.songs.indexOfFirst { it == currentSong.id }
-        var PreviousSongIndex = if (currentSongIndex==0){
-            SongsListActivity.category.songs.size-1}
-        else {
+        val previousSongIndex = if (currentSongIndex == 0) {
+            SongsListActivity.category.songs.size - 1
+        } else {
             (currentSongIndex - 1) % SongsListActivity.category.songs.size
         }
-        val PreviousSongId = SongsListActivity.category.songs[PreviousSongIndex]
-        FirebaseFirestore.getInstance().collection("songs").document(PreviousSongId)
+        val previousSongId = SongsListActivity.category.songs[previousSongIndex]
+
+        FirebaseFirestore.getInstance().collection("songs").document(previousSongId)
             .get()
             .addOnSuccessListener { documentSnapshot ->
-                val PreviousSong = documentSnapshot.toObject(SongModels::class.java)
-                if (PreviousSong != null) {
-                    // Successfully retrieved the next song
-                    onSuccess(PreviousSong)
+                val previousSong = documentSnapshot.toObject(SongModels::class.java)
+                if (previousSong != null) {
+                    onSuccess(previousSong)
                 } else {
                     onFailure()
                 }
             }
             .addOnFailureListener { exception ->
-                // Handle failure to retrieve the next song
                 exception.printStackTrace()
                 onFailure()
             }
     }
 
-
-
     private fun playNextSong() {
-        MyExoplayer.getCurrentSong()?.let { currentSong ->
-            getNextSong(currentSong,
-                onSuccess = { nextSong ->
-                    MyExoplayer.startPlaying(this, nextSong)
-                    updateUI(nextSong)
-                },
-                onFailure = {
-                    // Handle failure to retrieve the next song
-                    // For example, display a message indicating no next song available
-                }
-            )
+        MyExoplayer.currentPlaylist.let { playlist ->
+            if (playlist.isEmpty()) {
+                showToast("No songs in playlist")
+                return
+            }
+
+            val currentIndex = playlist.indexOfFirst { it == MyExoplayer.getCurrentSong()?.id }
+            val nextIndex = (currentIndex + 1) % playlist.size
+            playSongAtIndex(nextIndex)
         }
     }
 
-
     private fun getNextSong(currentSong: SongModels, onSuccess: (SongModels) -> Unit, onFailure: () -> Unit) {
-        // Logic to retrieve the next song based on the current song
         val currentSongIndex = SongsListActivity.category.songs.indexOfFirst { it == currentSong.id }
         val nextSongIndex = (currentSongIndex + 1) % SongsListActivity.category.songs.size
-
         val nextSongId = SongsListActivity.category.songs[nextSongIndex]
+
         FirebaseFirestore.getInstance().collection("songs").document(nextSongId)
             .get()
             .addOnSuccessListener { documentSnapshot ->
                 val nextSong = documentSnapshot.toObject(SongModels::class.java)
                 if (nextSong != null) {
-                    // Successfully retrieved the next song
                     onSuccess(nextSong)
                 } else {
                     onFailure()
                 }
             }
             .addOnFailureListener { exception ->
-                // Handle failure to retrieve the next song
                 exception.printStackTrace()
                 onFailure()
             }
     }
 
-
-
     private fun updateUI(song: SongModels) {
         binding.songTitleTextView.text = song.title
         binding.songSubtitleTextView.text = song.subtitle
-        Glide.with(binding.songCoverImageView).load(song.coverUrl)
+        Glide.with(binding.songCoverImageView)
+            .load(song.coverUrl)
             .apply(RequestOptions().transform(RoundedCorners(32)))
             .into(binding.songCoverImageView)
+    }
+
+    private fun playSongAtIndex(index: Int) {
+        val playlist = MyExoplayer.currentPlaylist
+        if (index !in playlist.indices) {
+            showToast("Invalid song index")
+            return
+        }
+
+        FirebaseFirestore.getInstance().collection("songs")
+            .document(playlist[index])
+            .get()
+            .addOnSuccessListener { documentSnapshot ->
+                documentSnapshot.toObject(SongModels::class.java)?.let { song ->
+                    MyExoplayer.startPlaying(
+                        context = this,
+                        song = song,
+                        playlist = playlist,
+                        isSearch = MyExoplayer.isSearchContext
+                    )
+                    updateUI(song)
+                }
+            }
+    }
+
+    private fun showToast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        exoPlayer.removeListener(playerListener)
     }
 }

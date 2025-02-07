@@ -15,28 +15,35 @@ import com.example.myapplication.models.SongModels
 import com.google.firebase.firestore.FirebaseFirestore
 
 
-class SongsListAdapters (private val songidList: List<String>):
+class SongsListAdapters(private val songidList: List<String>) :
     RecyclerView.Adapter<SongsListAdapters.MyViewHolder>() {
 
-    class MyViewHolder(private val binding:SongListItemRecyclerviewBinding):RecyclerView.ViewHolder(binding.root){
+    inner class MyViewHolder(private val binding: SongListItemRecyclerviewBinding) :
+        RecyclerView.ViewHolder(binding.root) {
         //bind data with view
-        fun bindData(songId : String){
-           FirebaseFirestore.getInstance().collection("songs")
-               .document(songId).get()
-               .addOnSuccessListener {
-                   val song= it.toObject(SongModels::class.java)
-                   song?.apply {
-                       binding.songTitleTextView.text=title
-                       binding.songSubtitleTextView.text=subtitle
-                       Glide.with(binding.songCoverImageView).load(coverUrl).
-                       apply(RequestOptions().transform(RoundedCorners(32)))
-                           .into(binding.songCoverImageView)
-                        binding.root.setOnClickListener{
-                            MyExoplayer.startPlaying(binding.root.context,song)
-                            it.context.startActivity(Intent(it.context,PlayerActivity::class.java))
+        fun bindData(songId: String) {
+            FirebaseFirestore.getInstance().collection("songs")
+                .document(songId).get()
+                .addOnSuccessListener {
+                    val song = it.toObject(SongModels::class.java)
+                    song?.apply {
+                        binding.songTitleTextView.text = title
+                        binding.songSubtitleTextView.text = subtitle
+                        Glide.with(binding.songCoverImageView).load(coverUrl)
+                            .apply(RequestOptions().transform(RoundedCorners(32)))
+                            .into(binding.songCoverImageView)
+
+                        binding.root.setOnClickListener {
+                            MyExoplayer.startPlaying(
+                                context = binding.root.context,
+                                song = song,
+                                playlist = songidList,
+                                isSearch = false
+                            )
+                            it.context.startActivity(Intent(it.context, PlayerActivity::class.java))
                         }
-                   }
-               }
+                    }
+                }
         }
     }
 
