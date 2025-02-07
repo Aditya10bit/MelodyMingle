@@ -11,6 +11,8 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestOptions
@@ -135,15 +137,15 @@ class PlayerActivity : AppCompatActivity() {
 
     @OptIn(UnstableApi::class)
     private fun setupPlayerUI(song: SongModels) {
-        binding.songTitleTextView.text = song.title
-        binding.songSubtitleTextView.text = song.subtitle
+        binding.songTitleTextView.text = song.title ?: "Loading..."
+        binding.songSubtitleTextView.text = song.subtitle ?: "Loading..."
 
-        // Improve image loading with crossfade and placeholder
-        Glide.with(binding.songCoverImageView)
+        Glide.with(this)
             .load(song.coverUrl)
+            .placeholder(R.drawable.ic_play_play) // Show placeholder
+            .error(R.drawable.ic_play_play)
+            .transform(CircleCrop())
             .transition(DrawableTransitionOptions.withCrossFade())
-            .circleCrop()
-            .error(R.drawable.mpplayer)
             .into(binding.songCoverImageView)
 
         exoPlayer = MyExoplayer.getInstance()!!
@@ -167,6 +169,7 @@ class PlayerActivity : AppCompatActivity() {
         binding.nextButton.setOnClickListener { playNextSong() }
         binding.PreviousButton.setOnClickListener { playPreviousSong() }
     }
+
 
     private fun showGif(show: Boolean) {
         binding.songGifImageView.apply {
@@ -264,7 +267,7 @@ class PlayerActivity : AppCompatActivity() {
         binding.songSubtitleTextView.text = song.subtitle
         Glide.with(binding.songCoverImageView)
             .load(song.coverUrl)
-            .apply(RequestOptions().transform(RoundedCorners(32)))
+            .apply(RequestOptions().transform(CircleCrop())) // Use CircleCrop here
             .into(binding.songCoverImageView)
     }
 
@@ -274,6 +277,7 @@ class PlayerActivity : AppCompatActivity() {
             showToast("Invalid song index")
             return
         }
+
 
         FirebaseFirestore.getInstance().collection("songs")
             .document(playlist[index])

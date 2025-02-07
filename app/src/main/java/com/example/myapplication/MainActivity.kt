@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
@@ -37,6 +38,13 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.firestore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 
 class MainActivity : AppCompatActivity() {
@@ -465,87 +473,133 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun setupSection(
+    private fun setupSection(
         id: String,
         mainLayout: RelativeLayout,
         titleView: TextView,
         recyclerView: RecyclerView
     ) {
-        Firebase.firestore.collection("sections").document(id)
-            .get().addOnSuccessListener {
-                val section = it.toObject(CategoryModels::class.java)
-                section?.apply {
-                    mainLayout.visibility = View.VISIBLE
-                    titleView.text = name
-                    recyclerView.layoutManager =
-                        LinearLayoutManager(
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val documentSnapshot = Firebase.firestore.collection("sections").document(id).get().await()
+                val section = documentSnapshot.toObject(CategoryModels::class.java)
+
+                withContext(Dispatchers.Main) {
+                    section?.apply {
+                        // Ensure songs is not null, defaulting to an empty list if it is
+                        val songList = songs ?: emptyList()
+
+                        // Fetch song details concurrently
+                        val songDetails = fetchSongDetails(songList)
+
+                        if (songList.isNotEmpty()) {
+                            mainLayout.visibility = View.VISIBLE
+                            titleView.text = name
+
+                            recyclerView.layoutManager = LinearLayoutManager(
+                                this@MainActivity,
+                                LinearLayoutManager.HORIZONTAL,
+                                false
+                            )
+
+                            recyclerView.adapter = SectionSongListAdapter(
+                                songIdList = songList,
+                                context = this@MainActivity
+                            )
+
+                            setupRecyclerViewAnimations(recyclerView)
+
+                            mainLayout.setOnClickListener {
+                                SongsListActivity.category = section
+                                startActivity(Intent(this@MainActivity, SongsListActivity::class.java))
+                            }
+                        } else {
+                            mainLayout.visibility = View.GONE
+                        }
+                    } ?: run {
+                        mainLayout.visibility = View.GONE
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    mainLayout.visibility = View.GONE
+                    Log.e("MainActivity", "Error fetching section: ${e.message}")
+                }
+            }
+        }
+    }
+
+    private suspend fun fetchSongDetails(songIds: List<String>): List<SongModels> = withContext(Dispatchers.IO) {
+        if (songIds.isEmpty()) return@withContext emptyList()
+
+        songIds.map { songId ->
+            async {
+                Firebase.firestore.collection("songs")
+                    .document(songId)
+                    .get()
+                    .await()
+                    .toObject(SongModels::class.java)
+            }
+        }.awaitAll().filterNotNull()
+    }
+
+    private fun setupMostlyPlayed(
+        id: String,
+        mainLayout: RelativeLayout,
+        titleView: TextView,
+        recyclerView: RecyclerView
+    ) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val sectionSnapshot = Firebase.firestore.collection("sections").document(id).get().await()
+                val section = sectionSnapshot.toObject(CategoryModels::class.java)
+
+                val topSongsSnapshot = FirebaseFirestore.getInstance().collection("songs")
+                    .orderBy("count", Query.Direction.DESCENDING)
+                    .limit(10)
+                    .get()
+                    .await()
+
+                val songsModelList = topSongsSnapshot.documents
+                    .mapNotNull { it.toObject(SongModels::class.java) }
+
+                withContext(Dispatchers.Main) {
+                    if (section != null) {
+                        // Create a mutable copy of the songs list if it's null
+                        val songIds = section.songs?.toMutableList() ?: mutableListOf()
+                        songIds.addAll(songsModelList.map { it.id })
+
+                        mainLayout.visibility = View.VISIBLE
+                        titleView.text = section.name ?: "Mostly Played"
+
+                        recyclerView.layoutManager = LinearLayoutManager(
                             this@MainActivity,
                             LinearLayoutManager.HORIZONTAL,
                             false
                         )
-                    recyclerView.adapter = SectionSongListAdapter(
-                        songs,
-                        context = this@MainActivity
-                    )
-                    // Add animation here
-                    setupRecyclerViewAnimations(recyclerView)  // Add this line
-                    mainLayout.setOnClickListener {
-                        SongsListActivity.category = section
-                        startActivity(Intent(this@MainActivity, SongsListActivity::class.java))
+
+                        recyclerView.adapter = SectionSongListAdapter(
+                            songIds,
+                            context = this@MainActivity
+                        )
+
+                        setupRecyclerViewAnimations(recyclerView)
+
+                        mainLayout.setOnClickListener {
+                            SongsListActivity.category = section
+                            startActivity(Intent(this@MainActivity, SongsListActivity::class.java))
+                        }
+                    } else {
+                        mainLayout.visibility = View.GONE
                     }
                 }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    mainLayout.visibility = View.GONE
+                    Log.e("MainActivity", "Error fetching mostly played: ${e.message}")
+                }
             }
-    }
-
-    fun setupMostlyPlayed(
-        id: String,
-        mainLayout: RelativeLayout,
-        titleView: TextView,
-        recyclerView: RecyclerView
-    ) {
-        Firebase.firestore.collection("sections").document(id)
-            .get().addOnSuccessListener {
-                FirebaseFirestore.getInstance().collection("songs")
-                    .orderBy("count", Query.Direction.DESCENDING).limit(10)
-                    .get().addOnSuccessListener { songListSnapshot ->
-                        val songsModelList = mutableListOf<SongModels>()
-                        for (document in songListSnapshot.documents) {
-                            val songModel = document.toObject(SongModels::class.java)
-                            songModel?.let {
-                                songsModelList.add(it)
-                            }
-                        }
-
-                        val songIdList = songsModelList.map { it.id }
-                        val section = it.toObject(CategoryModels::class.java)
-                        section?.apply {
-                            section.songs = songIdList
-                            mainLayout.visibility = View.VISIBLE
-                            titleView.text = name
-                            recyclerView.layoutManager =
-                                LinearLayoutManager(
-                                    this@MainActivity,
-                                    LinearLayoutManager.HORIZONTAL,
-                                    false
-                                )
-                            recyclerView.adapter = SectionSongListAdapter(
-                                songs,
-                                context = this@MainActivity
-                            )
-                            // Add animation here
-                            setupRecyclerViewAnimations(recyclerView)  // Add this line
-                            mainLayout.setOnClickListener {
-                                SongsListActivity.category = section
-                                startActivity(
-                                    Intent(
-                                        this@MainActivity,
-                                        SongsListActivity::class.java
-                                    )
-                                )
-                            }
-                        }
-                    }
-            }
+        }
     }
 
 
